@@ -1,4 +1,4 @@
-clink
+Clink
 =====
 
-A command-line URL collecter and organizer
+Clink is a CLI tool written in Python for storing and organizing URLs in simple text files. Its name stands for "collect link".
