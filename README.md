@@ -7,7 +7,7 @@ The basic usage is:
 
 `clink.py -a title`
 
-This will append `title` and the clipboard contents (a URL) the links file. To view the links:
+This will append _title_ and the clipboard contents (a URL) to the links file. To view the links:
 
 `clink.py -l`
 
