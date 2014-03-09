@@ -6,7 +6,7 @@
 import pyperclip, argparse
 
 parser = argparse.ArgumentParser(
-    description="A simple bookmark manager and collecter",
+    description="A simple bookmark manager for the command-line",
     epilog="And that's all folks!")
 
 exgroup = parser.add_mutually_exclusive_group()
@@ -20,7 +20,7 @@ def addLink(title, url):
         linksfile.close()
         print("Added bookmark: "+url)
 
-def viewLink():
+def listLink():
     linksfile = open('links.txt')
     filecontents = linksfile.read()
     print filecontents
@@ -33,6 +33,6 @@ if args.add:
     else:
         print("The clipboard is empty.")
 elif args.list:
-    viewLink()
+    listLink()
 
 quit()

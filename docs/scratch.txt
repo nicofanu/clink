@@ -3,13 +3,13 @@
     * argparse
     * getopts
     * optparse
+  *Decided to go with argparse.
 
 - Basic parameter scheme
-    add
-    ls, list
-    rm, del
-    find
-    -n
+    -a, --add
+    -l, --list
+    -d, --del
+    --find
     -t, --title
     -l, --link
     -c, --tag
