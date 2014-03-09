@@ -3,25 +3,22 @@
 # Clink - the CLI URL collector
 # Author: Nicholay Nascimento
 
-import pyperclip, os, sys
+import pyperclip, argparse
 
-nargs = len(sys.argv)    # Will be useful later when I figure out argument parsing
+parser = argparse.ArgumentParser(
+    description="A simple bookmark manager and collecter",
+    epilog="And that's all folks!")
 
-def printUsage():
-    print("Usage is: %s <title>" % os.path.basename(sys.argv[0]))
+exgroup = parser.add_mutually_exclusive_group()
+exgroup.add_argument("-a", "--add", help="Add a bookmark", metavar="item")
+exgroup.add_argument("-l", "--list", action="store_true", help="List all the bookmarks")
+args = parser.parse_args()
 
-def addLink():
-    if (nargs>1):
-        title = sys.argv[1]
-        url = pyperclip.paste()    
-        if (url):
-            linksfile = open('links.txt', 'a')
-            linksfile.write(title+"\n"+url+("\n"*2))
-            linksfile.close()
-        else:
-            print("The clipboard is empty.")
-    else:
-         printUsage()
+def addLink(title, url):
+        linksfile = open('links.txt', 'a')
+        linksfile.write(title+"\n"+url+("\n"*2))
+        linksfile.close()
+        print("Added bookmark: "+url)
 
 def viewLink():
     linksfile = open('links.txt')
@@ -29,6 +26,13 @@ def viewLink():
     print filecontents
     linksfile.close()
          
-addLink()
-viewLink()
+if args.add:
+    turl = pyperclip.paste()
+    if turl:
+        addLink(args.add, turl)
+    else:
+        print("The clipboard is empty.")
+elif args.list:
+    viewLink()
+
 quit()
