@@ -9,7 +9,7 @@
     -a, --add
     -l, --list
     -d, --del
-    --find
+    -f, --find
     -t, --title
     -l, --link
     -c, --tag
