@@ -3,21 +3,34 @@
 # Clink - the CLI URL collector
 # Author: Nicholay Nascimento
 
-import pyperclip, argparse
+import pyperclip, argparse, os
 
 parser = argparse.ArgumentParser(
     description="A simple bookmark manager for the command-line",
     epilog="And that's all folks!")
-
 exgroup = parser.add_mutually_exclusive_group()
 exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="item")
 exgroup.add_argument("-d", "--delete", help="delete a bookmark by id", metavar="id")
 exgroup.add_argument("-l", "--list", action="store_true", help="list all the bookmarks")
 exgroup.add_argument("-f", "--find", help="search for bookmarks containing substring", metavar="string")
 #exgroup.add_argument("-v", "--version", action="version", version="%(prog)s version 1.0")
+
 args = parser.parse_args()
 
 linksfilename = "links.txt"
+
+def fileCheck():
+    case = True
+    if not os.path.exists(linksfilename):
+        try:
+            # If the links file doesn't exist, create it
+            linksfile = open(linksfilename, 'w')
+        except IOError:
+            print("error: '"+linksfilename+"' could not be accessed")
+            case = False
+        finally:
+            linksfile.close()
+    return case
 
 def addLink(title, url):
     s = ""
@@ -34,17 +47,24 @@ def delLink(b_id):
     b_id = int(b_id)-1
     b_title = all_the_links[b_id][1]
     print(listLinks([all_the_links[b_id]])[0])
-    print("\nreally delete this bookmark? y/n ")
-    del all_the_links[b_id]
-    string = ""
-    for bookmarks in all_the_links:
-        for c in [1, 2]:
-            string += bookmarks[c]+"\n"
-        string += "\n"
-    linksfile = open(linksfilename, "w")
-    linksfile.write(string)
-    linksfile.close()
-    print("\""+b_title+"\" deleted")
+    choice = ""
+    while (choice.lower() != "y") or (choice.lower() !="n"):
+        choice = raw_input("\nreally delete this bookmark? y/n ")
+        if choice.lower() == 'y':
+            del all_the_links[b_id]
+            string = ""
+            for bookmarks in all_the_links:
+                for c in [1, 2]:
+                    string += bookmarks[c]+"\n"
+                string += "\n"
+            linksfile = open(linksfilename, "w")
+            linksfile.write(string)
+            linksfile.close()
+            print("\""+b_title+"\" deleted")
+            break
+        elif choice.lower() == 'n':
+            print("abort")
+            break
     return
 
 def findLink(search_string):
@@ -71,7 +91,6 @@ def findLink(search_string):
 
 def listLinks(all_the_links):
     linkstring = ""
-    linksshown = ""
     for bookmarks in all_the_links:
         linkstring += "%s: " % bookmarks[0]
         for c in [1, 2]:
@@ -91,6 +110,8 @@ def listLinks(all_the_links):
 
 def linksParser():
     """Prepares the bookmarks data for use by other functions"""
+    if not fileCheck():
+        quit()
     linksfile = open(linksfilename)
     filecontents = linksfile.read()
     linksfile.close()
