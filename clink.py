@@ -33,6 +33,7 @@ def fileCheck():
     return case
 
 def addLink(title, url):
+    if not fileCheck(): quit()
     s = ""
     entry = [title, url]
     for elems in entry: s = s+elems+"\n"
@@ -87,7 +88,7 @@ def findLink(search_string):
     if matches:
         return listLinks(matches)
     else:
-        return "no matches found"
+        return None
 
 def listLinks(all_the_links):
     linkstring = ""
@@ -101,17 +102,16 @@ def listLinks(all_the_links):
             linkstring += space+bookmarks[c]+"\n"    
         linkstring += "\n"
     total = len(all_the_links)
-    if total > 1:
-        s = "s"
-    else:
+    if total == 1:
         s = ""
+    else:
+        s = "s"
     totalsmessage = "%s bookmark" % total + s + " shown"
     return linkstring.strip("\n"), totalsmessage
 
 def linksParser():
     """Prepares the bookmarks data for use by other functions"""
-    if not fileCheck():
-        quit()
+    if not fileCheck(): quit()
     linksfile = open(linksfilename)
     filecontents = linksfile.read()
     linksfile.close()
@@ -152,11 +152,17 @@ elif args.delete:
     delLink(args.delete)
 elif args.find:
     listresults = findLink(args.find)
-    print(listresults[0])
-    print("\n"+listresults[1])
+    if listresults:
+        print(listresults[0])
+        print("\n"+listresults[1])
+    else:
+        print("no matches found")
 elif args.list:
     listresults = listLinks(linksParser())
-    print(listresults[0])
-    print("\n"+listresults[1])
+    if listresults[0]:
+        print(listresults[0])
+        print("\n"+listresults[1])
+    else:
+        print("you don't have any bookmarks")
 
 quit()
