@@ -7,9 +7,10 @@ import pyperclip, argparse, os
 
 parser = argparse.ArgumentParser(
     description="A simple bookmark manager for the command-line",
-    epilog="And that's all folks!")
+    epilog="")
 exgroup = parser.add_mutually_exclusive_group()
-exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="item")
+exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="title")
+exgroup.add_argument("-c", "--copy", help="copy url to clipboard", metavar="id")
 exgroup.add_argument("-d", "--delete", help="delete a bookmark by id", metavar="id")
 exgroup.add_argument("-l", "--list", action="store_true", help="list all the bookmarks")
 exgroup.add_argument("-f", "--find", help="search for bookmarks containing substring", metavar="string")
@@ -23,7 +24,7 @@ def fileCheck():
     case = True
     if not os.path.exists(linksfilename):
         try:
-            # If the links file doesn't exist, create it
+            ## If the links file doesn't exist, create it
             linksfile = open(linksfilename, 'w')
         except IOError:
             print("error: '"+linksfilename+"' could not be accessed")
@@ -35,12 +36,21 @@ def fileCheck():
 def addLink(title, url):
     if not fileCheck(): quit()
     s = ""
+    #date = strftime("%Y-%m-%d", gmtime())
     entry = [title, url]
     for elems in entry: s = s+elems+"\n"
     linksfile = open(linksfilename, "a")
     linksfile.write(s + "\n")
     linksfile.close()
     print("added bookmark: "+url)
+    return
+
+def copyLink(b_id):
+    all_the_links = linksParser()
+    b_id = int(b_id)-1
+    url = all_the_links[b_id][2]
+    pyperclip.copy(url)
+    print("copied to clipboard: "+url)
     return
 
 def delLink(b_id):
@@ -148,6 +158,8 @@ if args.add:
         addLink(args.add, turl)
     else:
         print("the clipboard is empty")
+elif args.copy:
+    copyLink(args.copy)
 elif args.delete:
     delLink(args.delete)
 elif args.find:
