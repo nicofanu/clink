@@ -3,7 +3,7 @@
 # Clink - the CLI URL collector
 # Author: Nicholay Nascimento
 
-import pyperclip, argparse, os
+import pyperclip, argparse, os, re
 
 parser = argparse.ArgumentParser(
     description="A simple bookmark manager for the command-line",
@@ -12,8 +12,9 @@ exgroup = parser.add_mutually_exclusive_group()
 exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="title")
 exgroup.add_argument("-c", "--copy", help="copy url to clipboard", metavar="id")
 exgroup.add_argument("-d", "--delete", help="delete a bookmark by id", metavar="id")
-exgroup.add_argument("-l", "--list", action="store_true", help="list all the bookmarks")
 exgroup.add_argument("-f", "--find", help="search for bookmarks containing substring", metavar="string")
+exgroup.add_argument("-l", "--list", action="store_true", help="list all the bookmarks")
+#exgroup.add_argument("-u", "--update", help="replace bookmark contents", metavar="id")
 #exgroup.add_argument("-v", "--version", action="version", version="%(prog)s version 1.0")
 
 args = parser.parse_args()
@@ -27,36 +28,51 @@ def fileCheck():
             ## If the links file doesn't exist, create it
             linksfile = open(linksfilename, 'w')
         except IOError:
-            print("error: '"+linksfilename+"' could not be accessed")
+            print "error: '" + linksfilename + "' could not be accessed"
             case = False
         finally:
             linksfile.close()
     return case
 
+def idIsNum(param):
+    ## Check whether the argument is a number
+    if re.match("\d", param):
+        return True
+    else:
+        return False
+
 def addLink(title, url):
     if not fileCheck(): quit()
     s = ""
-    #date = strftime("%Y-%m-%d", gmtime())
+    #date = strftime("%Y-%m-%d", time.gmtime())
     entry = [title, url]
     for elems in entry: s = s+elems+"\n"
     linksfile = open(linksfilename, "a")
     linksfile.write(s + "\n")
     linksfile.close()
-    print("added bookmark: "+url)
+    print "added bookmark: " + url
     return
 
 def copyLink(b_id):
     all_the_links = linksParser()
     b_id = int(b_id)-1
-    url = all_the_links[b_id][2]
+    try:
+        url = all_the_links[b_id][2]
+    except:
+        print "bookmark doesn't exist"
+        return
     pyperclip.copy(url)
-    print("copied to clipboard: "+url)
+    print "copied to clipboard: " + url
     return
 
 def delLink(b_id):
     all_the_links = linksParser()
     b_id = int(b_id)-1
-    b_title = all_the_links[b_id][1]
+    try:
+        b_title = all_the_links[b_id][1]
+    except:
+        print "bookmark doesn't exist"
+        return
     print(listLinks([all_the_links[b_id]])[0])
     choice = ""
     while (choice.lower() != "y") or (choice.lower() !="n"):
@@ -71,7 +87,7 @@ def delLink(b_id):
             linksfile = open(linksfilename, "w")
             linksfile.write(string)
             linksfile.close()
-            print("\""+b_title+"\" deleted")
+            print "deleted \"" + b_title + "\""
             break
         elif choice.lower() == 'n':
             print("abort")
@@ -157,24 +173,30 @@ if args.add:
     if turl:
         addLink(args.add, turl)
     else:
-        print("the clipboard is empty")
+        print "the clipboard is empty"
 elif args.copy:
-    copyLink(args.copy)
+    if idIsNum(args.copy):
+        copyLink(args.copy)
+    else:
+        print "id must be a number"
 elif args.delete:
-    delLink(args.delete)
+    if idIsNum(args.delete):
+        delLink(args.delete)
+    else:
+        print "id must be a number"
 elif args.find:
     listresults = findLink(args.find)
     if listresults:
-        print(listresults[0])
-        print("\n"+listresults[1])
+        print listresults[0]
+        print "\n" + listresults[1]
     else:
-        print("no matches found")
+        print "no matches found"
 elif args.list:
     listresults = listLinks(linksParser())
     if listresults[0]:
-        print(listresults[0])
-        print("\n"+listresults[1])
+        print listresults[0]
+        print "\n" + listresults[1]
     else:
-        print("you don't have any bookmarks")
+        print "you don't have any bookmarks"
 
 quit()
