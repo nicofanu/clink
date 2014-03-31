@@ -19,32 +19,23 @@ exgroup.add_argument("-l", "--list", action="store_true", help="list all the boo
 
 args = parser.parse_args()
 
-linksfilename = "links.txt"
+linksfilename = "links.txt"     #Store bookmarks in this file
 
-def fileCheck():
-    case = True
-    if not os.path.exists(linksfilename):
-        try:
-            ## If the links file doesn't exist, create it
-            linksfile = open(linksfilename, 'w')
-        except IOError:
-            print "error: '" + linksfilename + "' could not be accessed"
-            case = False
-        finally:
-            linksfile.close()
-    return case
+#=====Class=====#
+#
+#class Bookmarks(list):
+#
+#    def __init__(self):
+#        pass
+#
+#    def __str__(self):
+#        pass
+#
+#=====Class=====#
 
-def idIsNum(param):
-    ## Check whether the argument is a number
-    if re.match("\d", param):
-        return True
-    else:
-        return False
 
 def addLink(title, url):
-    if not fileCheck(): quit()
     s = ""
-    #date = strftime("%Y-%m-%d", time.gmtime())
     entry = [title, url]
     for elems in entry: s = s+elems+"\n"
     linksfile = open(linksfilename, "a")
@@ -96,7 +87,7 @@ def delLink(b_id):
 
 def findLink(search_string):
     all_the_links = linksParser()
-    ## Generate a list of bookmarks that match
+    # Generate a list of bookmarks that match
     matches = []
     n = 0
     for a in range(0, len(all_the_links)):
@@ -110,7 +101,7 @@ def findLink(search_string):
                 b_id = a + 1
                 temps = all_the_links[a]
                 temps.extend([b_id])
-    ## Decide what to return
+    # Decide what to return
     if matches:
         return listLinks(matches)
     else:
@@ -137,18 +128,17 @@ def listLinks(all_the_links):
 
 def linksParser():
     """Prepares the bookmarks data for use by other functions"""
-    if not fileCheck(): quit()
     linksfile = open(linksfilename)
     filecontents = linksfile.read()
     linksfile.close()
-    ## Generate a list of newline positions in the 'filecontents' variable
+    # Generate a list of newline positions in the 'filecontents' variable
     newlines = []
     nlmarker = 0
     while nlmarker != -1:
         nlmarker = filecontents.find("\n", nlmarker+1)
         if nlmarker != -1:
             newlines.append(nlmarker)
-    ## Make lists out of title/url pairs, skipping newlines
+    # Make lists out of title/url pairs, skipping newlines
     bookmarks = []
     templist  = []
     x         = 0
@@ -168,6 +158,16 @@ def linksParser():
         x = y + 1
     return bookmarks
 
+if not os.path.exists(linksfilename):
+    try:
+        # Create the file if it doesn't exist
+        linksfile = open(linksfilename, 'w')
+    except IOError:
+        print "error: couldn't create or access '" + linksfilename + "'"
+        quit()
+    finally:
+        linksfile.close()
+
 if args.add:
     turl = pyperclip.paste()
     if turl:
@@ -175,15 +175,11 @@ if args.add:
     else:
         print "the clipboard is empty"
 elif args.copy:
-    if idIsNum(args.copy):
-        copyLink(args.copy)
-    else:
-        print "id must be a number"
+    if re.match("\d", args.copy): copyLink(args.copy)
+    else: print "id must be a number"
 elif args.delete:
-    if idIsNum(args.delete):
-        delLink(args.delete)
-    else:
-        print "id must be a number"
+    if re.match("\d", args.delete): delLink(args.delete)
+    else: print "id must be a number"
 elif args.find:
     listresults = findLink(args.find)
     if listresults:
@@ -198,5 +194,4 @@ elif args.list:
         print "\n" + listresults[1]
     else:
         print "you don't have any bookmarks"
-
 quit()
