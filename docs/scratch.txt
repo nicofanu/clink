@@ -1,15 +1,1 @@
-- Need to find out how to parse arguments.
-    Module choices are:
-    * argparse
-    * getopts
-    * optparse
-  *Decided to go with argparse.
 
-- Basic parameter scheme
-    -a, --add
-    -l, --list
-    -d, --del
-    -f, --find
-    -t, --title
-    -l, --link
-    -c, --tag

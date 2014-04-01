@@ -3,7 +3,7 @@
 # Clink - the CLI URL collector
 # Author: Nicholay Nascimento
 
-import pyperclip, argparse, os, re
+import pyperclip, argparse, os
 
 parser = argparse.ArgumentParser(
     description="A simple bookmark manager for the command-line",
@@ -19,66 +19,66 @@ exgroup.add_argument("-l", "--list", action="store_true", help="list all the boo
 
 args = parser.parse_args()
 
-linksfilename = "links.txt"     #Store bookmarks in this file
-
-#=====Class=====#
-#
-#class Bookmarks(list):
-#
-#    def __init__(self):
-#        pass
-#
-#    def __str__(self):
-#        pass
-#
-#=====Class=====#
-
+links_txt_name = "links.txt"                 #Store bookmarks in this file
 
 def addLink(title, url):
-    s = ""
-    entry = [title, url]
-    for elems in entry: s = s+elems+"\n"
-    linksfile = open(linksfilename, "a")
-    linksfile.write(s + "\n")
-    linksfile.close()
+    """Saves a new bookmark"""
+    bookmarks = linksParser()
+    bookmark_id = len(bookmarks)
+    new_entry = {'id'    : bookmark_id,
+                 'title' : title,
+                 'url'   : url
+                 }
+    bookmarks.append(new_entry)
+    writeLinks(bookmarks)
     print "added bookmark: " + url
     return
 
-def copyLink(b_id):
-    all_the_links = linksParser()
-    b_id = int(b_id)-1
+def writeLinks(bookmarks):
+    """Handles the actual writing of the bookmarks to the links file"""
+    nl                   = "\n"
+    string               = ""
+    last = len(bookmarks)
+    for i in range(last):
+        if i + 1 == last: nl = ""
+        string += bookmarks[i]['title'] + "\n"
+        string += bookmarks[i]['url'] + nl
+        string += nl
+    links_txt = open(links_txt_name, 'w')
+    links_txt.write(string)
+    links_txt.close()
+    return
+
+def copyLink(bookmark_id):
+    """Copies a bookmark URL to the clipboard"""
+    bookmarks = linksParser()
+    bookmark_id = int(bookmark_id)-1
     try:
-        url = all_the_links[b_id][2]
+        url = bookmarks[bookmark_id]['url']
     except:
         print "bookmark doesn't exist"
-        return
+        quit()
     pyperclip.copy(url)
     print "copied to clipboard: " + url
     return
 
-def delLink(b_id):
-    all_the_links = linksParser()
-    b_id = int(b_id)-1
-    try:
-        b_title = all_the_links[b_id][1]
-    except:
+def delLink(bookmark_id):
+    """Deletes a bookmark and saves the changes to file"""
+    bookmarks            = linksParser()
+    bookmark_id          = int(bookmark_id)-1
+    try: bookmarks[bookmark_id]
+    except IndexError:
         print "bookmark doesn't exist"
-        return
-    print(listLinks([all_the_links[b_id]])[0])
-    choice = ""
-    while (choice.lower() != "y") or (choice.lower() !="n"):
-        choice = raw_input("\nreally delete this bookmark? y/n ")
+        quit()
+    title                = bookmarks[bookmark_id]['title']
+    choice               = ""
+    listLinks([bookmarks[bookmark_id]])
+    while choice.lower() != ("y" or "n"):
+        choice = raw_input("really delete this bookmark? y/n ")
         if choice.lower() == 'y':
-            del all_the_links[b_id]
-            string = ""
-            for bookmarks in all_the_links:
-                for c in [1, 2]:
-                    string += bookmarks[c]+"\n"
-                string += "\n"
-            linksfile = open(linksfilename, "w")
-            linksfile.write(string)
-            linksfile.close()
-            print "deleted \"" + b_title + "\""
+            del bookmarks[bookmark_id]
+            writeLinks(bookmarks)
+            print "deleted '%s'" % title
             break
         elif choice.lower() == 'n':
             print("abort")
@@ -86,112 +86,92 @@ def delLink(b_id):
     return
 
 def findLink(search_string):
-    all_the_links = linksParser()
-    # Generate a list of bookmarks that match
-    matches = []
-    n = 0
-    for a in range(0, len(all_the_links)):
-        flag = 0
-        for b in [1, 2]:
-            string = all_the_links[a][b].lower()
-            x = string.find(search_string.lower())
-            if x >= 0 and flag == 0:
-                matches.append(all_the_links[a])
-                flag = 1
-                b_id = a + 1
-                temps = all_the_links[a]
-                temps.extend([b_id])
-    # Decide what to return
+    """Searches for bookmarks containing search_string, returns matches"""
+    bookmarks            = linksParser()
+    matches              = []
+    result               = -1
+    for i in range(len(bookmarks)):
+        already_found_in_vals = False        #Reset flag
+        for item in bookmarks[i]:
+            if not item == 'id':             #Skip searching the id
+                string = bookmarks[i][item].lower()
+                result = string.find(search_string.lower())
+            if result >= 0 and not already_found_in_vals:
+                matches.append(bookmarks[i])
+                already_found_in_vals = True
     if matches:
         return listLinks(matches)
     else:
         return None
 
-def listLinks(all_the_links):
-    linkstring = ""
-    for bookmarks in all_the_links:
-        linkstring += "%s: " % bookmarks[0]
-        for c in [1, 2]:
-            if c == 2:
-                space = "   "
-            else:
-                space = ""
-            linkstring += space+bookmarks[c]+"\n"    
-        linkstring += "\n"
-    total = len(all_the_links)
-    if total == 1:
-        s = ""
+def listLinks(bookmarks):
+    """Prints the bookmarks and returns total amount of them"""
+    if bookmarks:
+        total_bookmarks  = len(bookmarks)
+        for i in range(total_bookmarks):
+            print "%s: " % bookmarks[i]['id'] + bookmarks[i]['title']
+            print "   " + bookmarks[i]['url'] + "\n"
+        if total_bookmarks > 1: s = "s"      #This one's for the Grammar Nazis
+        else: s = ""
+        return "%s bookmark%s shown" % (total_bookmarks, s)
     else:
-        s = "s"
-    totalsmessage = "%s bookmark" % total + s + " shown"
-    return linkstring.strip("\n"), totalsmessage
+        return None
+
+def get_raw_links(filename):
+    raw_links = []
+    links_txt = open(filename, 'r')
+    templist = links_txt.read().splitlines()
+    links_txt.close()
+    for i in range(len(templist)):
+        if templist[i]:                      #Grow a new list, skipping
+            raw_links.append(templist[i])    #pesky empty strings
+    return raw_links
 
 def linksParser():
-    """Prepares the bookmarks data for use by other functions"""
-    linksfile = open(linksfilename)
-    filecontents = linksfile.read()
-    linksfile.close()
-    # Generate a list of newline positions in the 'filecontents' variable
-    newlines = []
-    nlmarker = 0
-    while nlmarker != -1:
-        nlmarker = filecontents.find("\n", nlmarker+1)
-        if nlmarker != -1:
-            newlines.append(nlmarker)
-    # Make lists out of title/url pairs, skipping newlines
-    bookmarks = []
-    templist  = []
-    x         = 0
-    c         = 0
-    b_id      = 1
-    for y in newlines:
-        if c == 2:
-            bookmarks.append(templist)
-            templist = []
-            c = 0
-        if filecontents[x:y] != "":
-            if not templist:
-                templist.append(b_id)
-                b_id += 1
-            templist.append(filecontents[x:y])
-            c += 1
-        x = y + 1
+    """Prepares bookmarks data for use by other functions"""
+    raw_links = get_raw_links(links_txt_name)
+    bookmarks            = []
+    tempdict             = {}
+    count                = 1
+    bookmark_id          = 1
+    for i in range(len(raw_links)):
+        if count == 1:
+            tempdict['id'] = bookmark_id
+            tempdict['title'] = raw_links[i]
+            bookmark_id += 1
+        else:
+            tempdict['url'] = raw_links[i]
+            bookmarks.append(tempdict)
+            tempdict = {}
+            count = 0
+        count += 1
     return bookmarks
 
-if not os.path.exists(linksfilename):
+if not os.path.exists(links_txt_name):
     try:
-        # Create the file if it doesn't exist
-        linksfile = open(linksfilename, 'w')
+        links_txt = open(links_txt_name, 'w')     #Create the file if it doesn't exist
     except IOError:
-        print "error: couldn't create or access '" + linksfilename + "'"
+        print "error: couldn't create or access '%s'" % links_txt_name
         quit()
     finally:
-        linksfile.close()
+        links_txt.close()
 
 if args.add:
     turl = pyperclip.paste()
-    if turl:
-        addLink(args.add, turl)
-    else:
-        print "the clipboard is empty"
+    if turl:        addLink(args.add, turl)
+    else:           print "the clipboard is empty"
 elif args.copy:
-    if re.match("\d", args.copy): copyLink(args.copy)
-    else: print "id must be a number"
+    if args.copy.isdigit(): copyLink(args.copy)
+    else:           print "not a valid id"
 elif args.delete:
-    if re.match("\d", args.delete): delLink(args.delete)
-    else: print "id must be a number"
+    if args.delete.isdigit(): delLink(args.delete)
+    else:           print "not a valid id"
 elif args.find:
     listresults = findLink(args.find)
-    if listresults:
-        print listresults[0]
-        print "\n" + listresults[1]
-    else:
-        print "no matches found"
+    if listresults: print listresults
+    else:           print "no matches found"
 elif args.list:
     listresults = listLinks(linksParser())
-    if listresults[0]:
-        print listresults[0]
-        print "\n" + listresults[1]
-    else:
-        print "you don't have any bookmarks"
+    if listresults: print listresults
+    else:           print "you don't have any bookmarks"
 quit()
