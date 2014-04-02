@@ -35,7 +35,7 @@ def addLink(title, url):
     return
 
 def writeLinks(bookmarks):
-    """Handles the actual writing of the bookmarks to the links file"""
+    """Handles the actual writing of the bookmarks to the text file"""
     nl                   = "\n"
     string               = ""
     last = len(bookmarks)
@@ -53,9 +53,8 @@ def copyLink(bookmark_id):
     """Copies a bookmark URL to the clipboard"""
     bookmarks = linksParser()
     bookmark_id = int(bookmark_id)-1
-    try:
-        url = bookmarks[bookmark_id]['url']
-    except:
+    try: url = bookmarks[bookmark_id]['url']
+    except IndexError:
         print "bookmark doesn't exist"
         quit()
     pyperclip.copy(url)
@@ -66,12 +65,11 @@ def delLink(bookmark_id):
     """Deletes a bookmark and saves the changes to file"""
     bookmarks            = linksParser()
     bookmark_id          = int(bookmark_id)-1
-    try: bookmarks[bookmark_id]
+    choice               = ""
+    try: title           = bookmarks[bookmark_id]['title']
     except IndexError:
         print "bookmark doesn't exist"
         quit()
-    title                = bookmarks[bookmark_id]['title']
-    choice               = ""
     listLinks([bookmarks[bookmark_id]])
     while choice.lower() != ("y" or "n"):
         choice = raw_input("really delete this bookmark? y/n ")
@@ -92,9 +90,9 @@ def findLink(search_string):
     result               = -1
     for i in range(len(bookmarks)):
         already_found_in_vals = False        #Reset flag
-        for item in bookmarks[i]:
-            if not item == 'id':             #Skip searching the id
-                string = bookmarks[i][item].lower()
+        for key in bookmarks[i]:
+            if not key == 'id':             #Skip searching the id
+                string = bookmarks[i][key].lower()
                 result = string.find(search_string.lower())
             if result >= 0 and not already_found_in_vals:
                 matches.append(bookmarks[i])
@@ -124,7 +122,7 @@ def get_raw_links(filename):
     links_txt.close()
     for i in range(len(templist)):
         if templist[i]:                      #Grow a new list, skipping
-            raw_links.append(templist[i])    #pesky empty strings
+            raw_links.append(templist[i])    #those pesky empty strings
     return raw_links
 
 def linksParser():
