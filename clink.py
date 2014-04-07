@@ -3,19 +3,18 @@
 # Clink - the CLI URL collector
 # Author: Nicholay Nascimento
 
-import pyperclip, argparse, os
+import pyperclip, argparse, os, time
 
 parser = argparse.ArgumentParser(
     description="A simple bookmark manager for the command-line",
     epilog="")
 exgroup = parser.add_mutually_exclusive_group()
-exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="title")
+exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="title", nargs='?',
+    const=time.strftime("%F", time.gmtime()))
 exgroup.add_argument("-c", "--copy", help="copy url to clipboard", metavar="id")
 exgroup.add_argument("-d", "--delete", help="delete a bookmark by id", metavar="id")
 exgroup.add_argument("-f", "--find", help="search for bookmarks containing substring", metavar="string")
 exgroup.add_argument("-l", "--list", action="store_true", help="list all the bookmarks")
-#exgroup.add_argument("-u", "--update", help="replace bookmark contents", metavar="id")
-#exgroup.add_argument("-v", "--version", action="version", version="%(prog)s version 1.0")
 
 args = parser.parse_args()
 
@@ -31,7 +30,7 @@ def addLink(title, url):
                  }
     bookmarks.append(new_entry)
     writeLinks(bookmarks)
-    print "added bookmark: " + url
+    print "added bookmark %s: " % (new_entry['id'] + 1) + url
     return
 
 def writeLinks(bookmarks):
