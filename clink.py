@@ -71,8 +71,11 @@ def delLink(bookmark_id):
         quit()
     listLinks([bookmarks[bookmark_id]])
     while choice.lower() != ("y" or "n"):
-        choice = raw_input("really delete this bookmark? y/n ")
-        if choice.lower() == 'y':
+        try: choice = raw_input("really delete this bookmark? y/n ")
+	except KeyboardInterrupt:
+	    print "\nabort"
+	    break
+	if choice.lower() == 'y':
             del bookmarks[bookmark_id]
             writeLinks(bookmarks)
             print "deleted '%s'" % title
