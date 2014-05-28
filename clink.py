@@ -18,7 +18,7 @@ exgroup.add_argument("-l", "--list", action="store_true", help="list all the boo
 
 args = parser.parse_args()
 
-links_txt_name = "links.txt"                 #Store bookmarks in this file
+links_txt_name = "links.txt"                  #Store bookmarks in this file
 
 def addLink(title, url):
     """Saves a new bookmark"""
@@ -72,10 +72,10 @@ def delLink(bookmark_id):
     listLinks([bookmarks[bookmark_id]])
     while choice.lower() != ("y" or "n"):
         try: choice = raw_input("really delete this bookmark? y/n ")
-	except KeyboardInterrupt:
-	    print "\nabort"
-	    break
-	if choice.lower() == 'y':
+        except KeyboardInterrupt:
+            print "\nabort"
+            break
+        if choice.lower() == 'y':
             del bookmarks[bookmark_id]
             writeLinks(bookmarks)
             print "deleted '%s'" % title
@@ -91,9 +91,9 @@ def findLink(search_string):
     matches              = []
     result               = -1
     for i in range(len(bookmarks)):
-        already_found_in_vals = False        #Reset flag
+        already_found_in_vals = False         #Reset flag
         for key in bookmarks[i]:
-            if not key == 'id':             #Skip searching the id
+            if not key == 'id':               #Skip searching the id
                 string = bookmarks[i][key].lower()
                 result = string.find(search_string.lower())
             if result >= 0 and not already_found_in_vals:
@@ -105,13 +105,21 @@ def findLink(search_string):
         return None
 
 def listLinks(bookmarks):
-    """Prints the bookmarks and returns total amount of them"""
+    """Neatly prints the bookmarks and returns their total amount"""
     if bookmarks:
+        pad              = " "
+        digits           = len(str(bookmarks[-1]['id']))
+        fix_padding      = (digits+2) * pad   #Spacing before URLs, always fixed
         total_bookmarks  = len(bookmarks)
         for i in range(total_bookmarks):
-            print "%s: " % bookmarks[i]['id'] + bookmarks[i]['title']
-            print "   " + bookmarks[i]['url'] + "\n"
-        if total_bookmarks > 1: s = "s"      #This one's for the Grammar Nazis
+            x = (digits - len(str(bookmarks[i]['id'])))
+            if x != 0:
+                dyn_padding = x * pad         #Spacing before IDs, changes to 
+            else:                             #keep text aligned
+                dyn_padding = ""
+            print "%s%s: %s" % (dyn_padding, bookmarks[i]['id'], bookmarks[i]['title'])
+            print "%s%s\n" % (fix_padding, bookmarks[i]['url'])
+        if total_bookmarks > 1: s = "s"       #This one's for the Grammar Nazis
         else: s = ""
         return "%s bookmark%s shown" % (total_bookmarks, s)
     else:
@@ -123,8 +131,8 @@ def get_raw_links(filename):
     templist = links_txt.read().splitlines()
     links_txt.close()
     for i in range(len(templist)):
-        if templist[i]:                      #Grow a new list, skipping
-            raw_links.append(templist[i])    #those pesky empty strings
+        if templist[i]:                       #Grow a new list, skipping
+            raw_links.append(templist[i])     #those pesky empty strings
     return raw_links
 
 def linksParser():
@@ -149,7 +157,7 @@ def linksParser():
 
 if not os.path.exists(links_txt_name):
     try:
-        links_txt = open(links_txt_name, 'w')     #Create the file if it doesn't exist
+        links_txt = open(links_txt_name, 'w') #Create the file if it doesn't exist
     except IOError:
         print "error: couldn't create or access '%s'" % links_txt_name
         quit()
