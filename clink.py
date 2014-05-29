@@ -182,4 +182,6 @@ elif args.list:
     listresults = listLinks(linksParser())
     if listresults: print listresults
     else:           print "you don't have any bookmarks"
+else:
+    parser.print_help()
 quit()
