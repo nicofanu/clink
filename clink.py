@@ -125,23 +125,19 @@ def listLinks(bookmarks):
     else:
         return None
 
-def get_raw_links(filename):
-    raw_links = []
-    links_txt = open(filename, 'r')
+def linksParser():
+    """Prepares bookmarks data for use by other functions"""
+    raw_links            = []
+    bookmarks            = []
+    tempdict             = {}
+    count                = 1
+    bookmark_id          = 1
+    links_txt = open(links_txt_name)
     templist = links_txt.read().splitlines()
     links_txt.close()
     for i in range(len(templist)):
         if templist[i]:                       #Grow a new list, skipping
             raw_links.append(templist[i])     #those pesky empty strings
-    return raw_links
-
-def linksParser():
-    """Prepares bookmarks data for use by other functions"""
-    raw_links = get_raw_links(links_txt_name)
-    bookmarks            = []
-    tempdict             = {}
-    count                = 1
-    bookmark_id          = 1
     for i in range(len(raw_links)):
         if count == 1:
             tempdict['id'] = bookmark_id
