@@ -13,8 +13,8 @@ exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="title", narg
     const=time.strftime("%F"))
 exgroup.add_argument("-c", "--copy", help="copy url to clipboard", metavar="id")
 exgroup.add_argument("-d", "--delete", help="delete a bookmark by id", metavar="id")
-exgroup.add_argument("-f", "--find", help="search for bookmarks containing substring", metavar="string")
-exgroup.add_argument("-l", "--list", action="store_true", help="list all the bookmarks")
+exgroup.add_argument("-l", "--list", const=True,
+    help="list all bookmarks or just those containing TERM", metavar="term", nargs='?')
 
 args = parser.parse_args()
 
@@ -86,23 +86,25 @@ def delLink(bookmark_id):
     return
 
 def findLink(search_string):
-    """Searches for bookmarks containing search_string, returns matches"""
-    bookmarks            = linksParser()
-    matches              = []
-    result               = -1
-    for i in range(len(bookmarks)):
-        already_found_in_vals = False         #Reset flag
-        for key in bookmarks[i]:
-            if not key == 'id':               #Skip searching the id
-                string = bookmarks[i][key].lower()
-                result = string.find(search_string.lower())
-            if result >= 0 and not already_found_in_vals:
-                matches.append(bookmarks[i])
-                already_found_in_vals = True
-    if matches:
-        return listLinks(matches)
+    bookmarks = linksParser()
+    if search_string == True:                 #List all bookmarks by default if
+        return listLinks(bookmarks)           #no search string specified
     else:
-        return None
+        matches              = []
+        result               = -1
+        for i in range(len(bookmarks)):
+            already_found_in_vals = False     #Reset flag
+            for key in bookmarks[i]:
+                if not key == 'id':           #Skip searching the id
+                    string = bookmarks[i][key].lower()
+                    result = string.find(search_string.lower())
+                if result >= 0 and not already_found_in_vals:
+                    matches.append(bookmarks[i])
+                    already_found_in_vals = True
+        if matches:
+            return listLinks(matches)
+        else:
+            return "no matches found"
 
 def listLinks(bookmarks):
     """Neatly prints the bookmarks and returns their total amount"""
@@ -123,7 +125,7 @@ def listLinks(bookmarks):
         else: s = ""
         return "%s bookmark%s shown" % (total_bookmarks, s)
     else:
-        return None
+        return "you have no bookmarks"
 
 def linksParser():
     """Prepares bookmarks data for use by other functions"""
@@ -170,14 +172,8 @@ elif args.copy:
 elif args.delete:
     if args.delete.isdigit(): delLink(args.delete)
     else:           print "not a valid id"
-elif args.find:
-    listresults = findLink(args.find)
-    if listresults: print listresults
-    else:           print "no matches found"
 elif args.list:
-    listresults = listLinks(linksParser())
-    if listresults: print listresults
-    else:           print "you don't have any bookmarks"
+    print findLink(args.list)
 else:
     parser.print_help()
 quit()
