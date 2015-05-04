@@ -176,4 +176,3 @@ elif args.list:
     print findLink(args.list)
 else:
     parser.print_help()
-quit()
