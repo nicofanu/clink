@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(
     epilog="")
 exgroup = parser.add_mutually_exclusive_group()
 exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="title", nargs='?',
-    const=time.strftime("%F"))
+    const=time.strftime("%Y-%m-%d"))
 exgroup.add_argument("-c", "--copy", help="copy url to clipboard", metavar="id")
 exgroup.add_argument("-d", "--delete", help="delete a bookmark by id", metavar="id")
 exgroup.add_argument("-l", "--list", const=True,
