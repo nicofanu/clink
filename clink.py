@@ -1,13 +1,14 @@
 #! /usr/bin/env python
 
-# Clink - the CLI URL collector
-# Author: Nicholay Nascimento
+links_txt_name = "links.txt"                  #Store bookmarks in this file
 
 import pyperclip, argparse, os, time
 
 parser = argparse.ArgumentParser(
     description="A simple bookmark manager for the command-line",
-    epilog="")
+    epilog=
+    "Clink v1.0. Copyright 2015 by Nicholay Nascimento. BSD Simplified License."
+    )
 exgroup = parser.add_mutually_exclusive_group()
 exgroup.add_argument("-a", "--add", help="add a bookmark", metavar="title", nargs='?',
     const=time.strftime("%Y-%m-%d"))
@@ -17,8 +18,6 @@ exgroup.add_argument("-l", "--list", const=True,
     help="list all bookmarks or just those containing TERM", metavar="term", nargs='?')
 
 args = parser.parse_args()
-
-links_txt_name = "links.txt"                  #Store bookmarks in this file
 
 def addLink(title, url):
     """Saves a new bookmark"""
